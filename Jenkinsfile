@@ -1,29 +1,19 @@
 pipeline {
-   agent any
-	
-	tools {
-      jdk "Java8"
-   }
 
-   options(){
-    timestamps()
-  }
-   stages {
-		stage('Checkout') {
-            steps {
-                checkout scm
-            }
+    agent any
+    
+     stages {
+      stage ('Source composition analysis') {
+        steps {
+          sh 'rm owasp* || true'
+          sh 'wget "https://raw.githubusercontent.com/krunalbhoyar/Spring-Petclinic/master/owasp-dependency-check.sh" '
+          sh 'chmod +x owasp-dependency-check.sh'
+        
+          sh 'bash owasp-dependency-check.sh'
+          sh 'cat /var/lib/jenkins/workspace/vulnerable-owasp/odc-reports/dependency-check-report.xml'
+            
         }
-      stage('Build') {
-         steps {
-            sh("mvn -Dmaven.test.failure.ignore=true clean package")
-         }
-
-         post {
-            success {
-               junit '**/target/surefire-reports/TEST-*.xml'
-            }
-         }
+    }
+          
       }
-   }
 }
